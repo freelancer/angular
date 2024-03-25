@@ -299,6 +299,11 @@ export function getNgContainerSize(hydrationInfo: DehydratedView, index: number)
   return size;
 }
 
+export function isSerializedElementContainer(
+    hydrationInfo: DehydratedView, index: number): boolean {
+  return hydrationInfo.data[ELEMENT_CONTAINERS]?.[index] !== undefined;
+}
+
 export function getSerializedContainerViews(
     hydrationInfo: DehydratedView, index: number): SerializedContainerView[]|null {
   return hydrationInfo.data[CONTAINERS]?.[index] ?? null;

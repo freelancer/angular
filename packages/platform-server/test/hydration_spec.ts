@@ -2092,8 +2092,91 @@ describe('platform-server hydration integration', () => {
           verifyAllNodesClaimedForHydration(clientRootNode);
           verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
 
-          let div = clientRootNode.querySelector('div');
+          const div = clientRootNode.querySelector('div');
           expect(div.innerHTML).toBe('Some normal content');
+        });
+
+        it('should support content projection', async () => {
+          @Component({
+            standalone: true,
+            selector: 'app-content',
+            template:
+                `<ng-content select="span"></ng-content><ng-content select="div"></ng-content>`
+          })
+          class ContentComponent {
+          }
+
+          @Component({
+            standalone: true,
+            selector: 'app',
+            template: `<div i18n><app-content><div>one</div><span>two</span></app-content></div>`,
+            imports: [ContentComponent],
+          })
+          class SimpleComponent {
+          }
+
+          const providers = [withI18nHydration()] as unknown as Provider[];
+          const html = await ssr(SimpleComponent, undefined, providers);
+          const ssrContents = getAppContents(html);
+          expect(ssrContents).toContain('<app ngh');
+
+          resetTViewsFor(SimpleComponent, ContentComponent);
+
+          const appRef = await hydrate(html, SimpleComponent, providers);
+          const compRef = getComponentRef<SimpleComponent>(appRef);
+          appRef.tick();
+
+          const clientRootNode = compRef.location.nativeElement;
+          verifyAllNodesClaimedForHydration(clientRootNode);
+          verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
+
+          const content = clientRootNode.querySelector('app-content');
+          expect(content.innerHTML).toBe('<span>two</span><div>one</div>');
+        });
+
+        it('should support using translated nodes as view container anchors', async () => {
+          @Component({
+            standalone: true,
+            selector: 'dynamic-cmp',
+            template: `DynamicComponent content`,
+          })
+          class DynamicComponent {
+          }
+
+          @Component({
+            standalone: true,
+            selector: 'app',
+            template: `<div i18n><div #target>one</div><span>two</span></div>`,
+          })
+          class SimpleComponent {
+            @ViewChild('target', {read: ViewContainerRef}) vcr!: ViewContainerRef;
+
+            ngAfterViewInit() {
+              const compRef = this.vcr.createComponent(DynamicComponent);
+              compRef.changeDetectorRef.detectChanges();
+            }
+          }
+
+          const providers = [withI18nHydration()] as unknown as Provider[];
+          const html = await ssr(SimpleComponent, undefined, providers);
+          const ssrContents = getAppContents(html);
+          expect(ssrContents).toContain('<app ngh');
+
+          resetTViewsFor(SimpleComponent, DynamicComponent);
+
+          const appRef = await hydrate(html, SimpleComponent, providers);
+          const compRef = getComponentRef<SimpleComponent>(appRef);
+          appRef.tick();
+
+          const clientRootNode = compRef.location.nativeElement;
+          verifyAllNodesClaimedForHydration(clientRootNode);
+          verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
+
+          const div = clientRootNode.querySelector('div');
+          const clientContents = stripExcessiveSpaces(stripUtilAttributes(div.innerHTML, false));
+          expect(clientContents)
+              .toBe(
+                  '<div>one</div><dynamic-cmp>DynamicComponent content</dynamic-cmp><!--container--><span>two</span>');
         });
 
         it('should support translations that reorder placeholders', async () => {
@@ -2126,7 +2209,7 @@ describe('platform-server hydration integration', () => {
           verifyAllNodesClaimedForHydration(clientRootNode);
           verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
 
-          let div = clientRootNode.querySelector('div');
+          const div = clientRootNode.querySelector('div');
           expect(div.innerHTML).toBe('<span>dos</span><div>uno</div>');
         });
 
@@ -2160,8 +2243,39 @@ describe('platform-server hydration integration', () => {
           verifyAllNodesClaimedForHydration(clientRootNode);
           verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
 
-          let div = clientRootNode.querySelector('div');
+          const div = clientRootNode.querySelector('div');
           expect(div.innerHTML).toMatch(/Some <strong>strong<\/strong><!--ICU 26:0--> content/);
+        });
+
+        it('should support translations that remove elements', async () => {
+          loadTranslations(
+              {[computeMsgId('Hello {$START_TAG_STRONG}World{$CLOSE_TAG_STRONG}!')]: 'Bonjour!'});
+
+          @Component({
+            standalone: true,
+            selector: 'app',
+            template: `<div i18n>Hello <strong>World</strong>!</div>`,
+          })
+          class SimpleComponent {
+          }
+
+          const providers = [withI18nHydration()] as unknown as Provider[];
+          const html = await ssr(SimpleComponent, undefined, providers);
+          const ssrContents = getAppContents(html);
+          expect(ssrContents).toContain('<app ngh');
+
+          resetTViewsFor(SimpleComponent);
+
+          const appRef = await hydrate(html, SimpleComponent, providers);
+          const compRef = getComponentRef<SimpleComponent>(appRef);
+          appRef.tick();
+
+          const clientRootNode = compRef.location.nativeElement;
+          verifyAllNodesClaimedForHydration(clientRootNode);
+          verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
+
+          const div = clientRootNode.querySelector('div');
+          expect(div.innerHTML).toMatch(/Bonjour!/);
         });
 
         it('should cleanup dehydrated nodes', async () => {
@@ -2231,7 +2345,7 @@ describe('platform-server hydration integration', () => {
           verifyAllNodesClaimedForHydration(clientRootNode);
           verifyClientAndSSRContentsMatch(ssrContents, clientRootNode);
 
-          let div = clientRootNode.querySelector('div');
+          const div = clientRootNode.querySelector('div');
           expect(div.textContent).toBe('0 items, 1 item');
         });
 
@@ -2357,7 +2471,6 @@ describe('platform-server hydration integration', () => {
         it('should hydrate when using @for control flow', async () => {
           @Component({
             standalone: true,
-            imports: [NgFor],
             selector: 'app',
             template: `
                 <ol i18n>
