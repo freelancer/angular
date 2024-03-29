@@ -11,7 +11,7 @@ import {first} from 'rxjs/operators';
 import {APP_BOOTSTRAP_LISTENER, ApplicationRef} from '../application_ref';
 import {ENABLED_SSR_FEATURES} from '../application_tokens';
 import {Console} from '../console';
-import {ENVIRONMENT_INITIALIZER, EnvironmentProviders, Injector, makeEnvironmentProviders} from '../di';
+import {ENVIRONMENT_INITIALIZER, EnvironmentProviders, Injector, makeEnvironmentProviders, Provider} from '../di';
 import {inject} from '../di/injector_compatibility';
 import {formatRuntimeError, RuntimeError, RuntimeErrorCode} from '../errors';
 import {enableLocateOrCreateContainerRefImpl} from '../linker/view_container_ref';
@@ -82,7 +82,7 @@ function enableHydrationRuntimeSupport() {
 /**
  * Brings the necessary i18n hydration code in tree-shakable manner.
  * Similar to `enableHydrationRuntimeSupport`, the code is only
- * present when `withI18nHydration` is invoked.
+ * present when `withI18nSupport` is invoked.
  */
 function enableI18nHydrationRuntimeSupport() {
   if (!isI18nHydrationRuntimeSupportEnabled) {
@@ -174,7 +174,9 @@ export function withDomHydration(): EnvironmentProviders {
     {
       provide: ENVIRONMENT_INITIALIZER,
       useValue: () => {
-        setIsI18nHydrationSupportEnabled(isI18nHydrationEnabled());
+        // i18n support is enabled by calling withI18nSupport(), but there's
+        // no way to turn it off (e.g. for tests), so we turn it off by default.
+        setIsI18nHydrationSupportEnabled(false);
 
         // Since this function is used across both server and client,
         // make sure that the runtime code is only added when invoked
@@ -233,8 +235,8 @@ export function withDomHydration(): EnvironmentProviders {
  * Returns a set of providers required to setup support for i18n hydration.
  * Requires hydration to be enabled separately.
  */
-export function withI18nHydration(): EnvironmentProviders {
-  return makeEnvironmentProviders([
+export function withI18nSupport(): Provider[] {
+  return [
     {
       provide: IS_I18N_HYDRATION_ENABLED,
       useValue: true,
@@ -243,10 +245,12 @@ export function withI18nHydration(): EnvironmentProviders {
       provide: ENVIRONMENT_INITIALIZER,
       useValue: () => {
         enableI18nHydrationRuntimeSupport();
+        setIsI18nHydrationSupportEnabled(true);
+        performanceMarkFeature('NgI18nHydration');
       },
       multi: true,
     },
-  ]);
+  ];
 }
 
 /**

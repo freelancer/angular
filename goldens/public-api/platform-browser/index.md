@@ -147,7 +147,8 @@ export const enum HydrationFeatureKind {
     // (undocumented)
     NoDomReuseFeature = 0,
     // (undocumented)
-    NoHttpTransferCache = 1
+    NoHttpTransferCache = 1,
+    I18nSupport = 2,
 }
 
 // @public @deprecated
@@ -247,6 +248,9 @@ export const VERSION: Version;
 
 // @public
 export function withNoDomReuse(): HydrationFeature<HydrationFeatureKind.NoDomReuseFeature>;
+
+// @public
+export function withI18nSupport(): HydrationFeature<HydrationFeatureKind.I18nSupport>;
 
 // @public
 export function withNoHttpTransferCache(): HydrationFeature<HydrationFeatureKind.NoHttpTransferCache>;
