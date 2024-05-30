@@ -13,7 +13,7 @@ import {Renderer2} from '../render';
 import {collectNativeNodes, collectNativeNodesInLContainer} from '../render3/collect_native_nodes';
 import {getComponentDef} from '../render3/definition';
 import {CONTAINER_HEADER_OFFSET, LContainer} from '../render3/interfaces/container';
-import {TNode, TNodeType} from '../render3/interfaces/node';
+import {isTNodeShape, TNode, TNodeType} from '../render3/interfaces/node';
 import {RElement} from '../render3/interfaces/renderer_dom';
 import {hasI18n, isComponentHost, isLContainer, isProjectionTNode, isRootView} from '../render3/interfaces/type_checks';
 import {CONTEXT, HEADER_OFFSET, HOST, LView, PARENT, RENDERER, TView, TVIEW, TViewType} from '../render3/interfaces/view';
@@ -465,7 +465,7 @@ function serializeLView(lView: LView, context: HydrationContext): SerializedView
           // Check if projection next is not the same as next, in which case
           // the node would not be found at creation time at runtime and we
           // need to provide a location for that node.
-          appendSerializedNodePath(ngh, tNode.projectionNext, lView);
+          appendSerializedNodePath(ngh, tNode.projectionNext, lView, i18nChildren);
         }
       }
     }

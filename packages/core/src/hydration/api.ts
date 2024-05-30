@@ -246,7 +246,6 @@ export function withI18nSupport(): Provider[] {
       useValue: () => {
         enableI18nHydrationRuntimeSupport();
         setIsI18nHydrationSupportEnabled(true);
-        performanceMarkFeature('NgI18nHydration');
       },
       multi: true,
     },

@@ -81,6 +81,23 @@ export const enum TNodeType {
 }
 
 /**
+ * Helper function to detect if a given value matches a `TNode` shape.
+ *
+ * The logic uses the `insertBeforeIndex` and its possible values as
+ * a way to differentiate a TNode shape from other types of objects
+ * within the `TView.data`. This is not a perfect check, but it can
+ * be a reasonable differentiator, since we control the shapes of objects
+ * within `TView.data`.
+ */
+export function isTNodeShape(value: unknown): value is TNode {
+  return (
+      value != null && typeof value === 'object' &&
+      ((value as TNode).insertBeforeIndex === null ||
+       typeof (value as TNode).insertBeforeIndex === 'number' ||
+       Array.isArray((value as TNode).insertBeforeIndex)));
+}
+
+/**
  * Converts `TNodeType` into human readable text.
  * Make sure this matches with `TNodeType`
  */
