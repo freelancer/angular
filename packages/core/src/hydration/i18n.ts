@@ -15,12 +15,13 @@ import type {Renderer} from '../render3/interfaces/renderer';
 import type {RNode} from '../render3/interfaces/renderer_dom';
 import {HEADER_OFFSET, HYDRATION, LView, RENDERER, TView, TVIEW} from '../render3/interfaces/view';
 import {getFirstNativeNode, nativeRemoveNode} from '../render3/node_manipulation';
+import { isInSkipHydrationBlock } from '../render3/state';
 import {unwrapRNode} from '../render3/util/view_utils';
 import {assertDefined, assertNotEqual} from '../util/assert';
 
 import type {HydrationContext} from './annotate';
 import {DehydratedIcuData, DehydratedView, I18N_DATA} from './interfaces';
-import {isDisconnectedRNode, locateNextRNode, tryLocateRNodeByPath} from './node_lookup_utils';
+import {isDisconnectedRNode, isDisconnectedNode, locateNextRNode, tryLocateRNodeByPath} from './node_lookup_utils';
 import {IS_I18N_HYDRATION_ENABLED} from './tokens';
 import {getNgContainerSize, initDisconnectedNodes, isSerializedElementContainer, processTextNodeBeforeSerialization} from './utils';
 
@@ -389,6 +390,13 @@ function prepareI18nBlockForHydrationImpl(
 
   const hydrationInfo = lView[HYDRATION];
   if (!hydrationInfo) {
+    return;
+  }
+
+  if (isInSkipHydrationBlock()) {
+    return;
+  }
+  if (parentTNode && isDisconnectedNode(parentTNode, lView)) {
     return;
   }
 
