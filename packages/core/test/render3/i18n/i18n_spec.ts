@@ -91,6 +91,7 @@ describe('Runtime i18n', () => {
         ]),
         update: [] as unknown as I18nUpdateOpCodes,
         ast: [{kind: 0, index: HEADER_OFFSET + 1}],
+        parentTNodeIndex: HEADER_OFFSET,
       });
     });
 
@@ -135,6 +136,7 @@ describe('Runtime i18n', () => {
           },
           {kind: 0, index: HEADER_OFFSET + 8},
         ],
+        parentTNodeIndex: HEADER_OFFSET,
       });
     });
 
@@ -161,6 +163,7 @@ describe('Runtime i18n', () => {
               HEADER_OFFSET + 2}] as Text).textContent = \`Hello \${lView[i-1]}!\`; }`,
         ]),
         ast: [{kind: 0, index: HEADER_OFFSET + 2}],
+        parentTNodeIndex: HEADER_OFFSET,
       });
     });
 
@@ -185,6 +188,7 @@ describe('Runtime i18n', () => {
               2}] as Text).textContent = \`Hello \${lView[i-1]} and \${lView[i-2]}, again \${lView[i-1]}!\`; }`,
         ]),
         ast: [{kind: 0, index: HEADER_OFFSET + 2}],
+        parentTNodeIndex: HEADER_OFFSET,
       });
     });
 
@@ -226,6 +230,7 @@ describe('Runtime i18n', () => {
           {kind: 2, index: HEADER_OFFSET + 2, children: [], type: 1},
           {kind: 0, index: HEADER_OFFSET + 4}
         ],
+        parentTNodeIndex: HEADER_OFFSET,
       });
 
 
@@ -244,16 +249,19 @@ describe('Runtime i18n', () => {
           `lView[${HEADER_OFFSET + 4}] = document.createText("after");`,
         ]),
         update: [] as unknown as I18nUpdateOpCodes,
-        ast: [{
-          kind: 2,
-          index: HEADER_OFFSET + 1,
-          children: [
-            {kind: 0, index: HEADER_OFFSET + 3},
-            {kind: 2, index: HEADER_OFFSET + 2, children: [], type: 1},
-            {kind: 0, index: HEADER_OFFSET + 4}
-          ],
-          type: 0
-        }],
+        ast: [
+          {
+            kind: 2,
+            index: HEADER_OFFSET + 1,
+            children: [
+              {kind: 0, index: HEADER_OFFSET + 3},
+              {kind: 2, index: HEADER_OFFSET + 2, children: [], type: 1},
+              {kind: 0, index: HEADER_OFFSET + 4},
+            ],
+            type: 0,
+          },
+        ],
+        parentTNodeIndex: HEADER_OFFSET,
       });
 
 
@@ -271,12 +279,15 @@ describe('Runtime i18n', () => {
           `lView[${HEADER_OFFSET + 2}] = document.createText("middle");`,
         ]),
         update: [] as unknown as I18nUpdateOpCodes,
-        ast: [{
-          kind: 2,
-          index: HEADER_OFFSET + 1,
-          children: [{kind: 0, index: HEADER_OFFSET + 2}],
-          type: 0
-        }],
+        ast: [
+          {
+            kind: 2,
+            index: HEADER_OFFSET + 1,
+            children: [{kind: 0, index: HEADER_OFFSET + 2}],
+            type: 0,
+          },
+        ],
+        parentTNodeIndex: HEADER_OFFSET,
       });
     });
 
@@ -312,17 +323,10 @@ describe('Runtime i18n', () => {
               {kind: 1, index: HEADER_OFFSET + 5, children: [{kind: 0, index: HEADER_OFFSET + 6}]},
               {kind: 0, index: HEADER_OFFSET + 7}
             ],
-            [
-              {kind: 0, index: HEADER_OFFSET + 8},
-              {kind: 1, index: HEADER_OFFSET + 9, children: [{kind: 0, index: HEADER_OFFSET + 10}]}
-            ],
-            [
-              {kind: 0, index: HEADER_OFFSET + 11},
-              {kind: 1, index: HEADER_OFFSET + 12, children: [{kind: 0, index: HEADER_OFFSET + 13}]}
-            ]
           ],
-          currentCaseLViewIndex: HEADER_OFFSET + 3
+          currentCaseLViewIndex: HEADER_OFFSET + 3,
         }],
+        parentTNodeIndex: HEADER_OFFSET,
       });
       expect(getTIcu(tView, HEADER_OFFSET + 2)).toEqual(<TIcu>{
         type: 1,
@@ -413,23 +417,31 @@ describe('Runtime i18n', () => {
           `if (mask & 0b10) { icuSwitchCase(${HEADER_OFFSET + 6}, \`\${lView[i-2]}\`); }`,
           `if (mask & 0b1) { icuUpdateCase(${HEADER_OFFSET + 2}); }`,
         ]),
-        ast: [{
-          kind: 3,
-          index: HEADER_OFFSET + 2,
-          cases: [
-            [{kind: 0, index: HEADER_OFFSET + 4}],
-            [
-              {kind: 0, index: HEADER_OFFSET + 5}, {
-                kind: 3,
-                index: HEADER_OFFSET + 6,
-                cases: [[{kind: 0, index: HEADER_OFFSET + 8}], [{kind: 0, index: HEADER_OFFSET + 9}], [{kind: 0, index: HEADER_OFFSET + 10}]],
-                currentCaseLViewIndex: HEADER_OFFSET + 7
-              },
-              {kind: 0, index: HEADER_OFFSET + 11}
-            ]
-          ],
-          currentCaseLViewIndex: HEADER_OFFSET + 3
-        }],
+        ast: [
+          {
+            kind: 3,
+            index: HEADER_OFFSET + 2,
+            cases: [
+              [{kind: 0, index: HEADER_OFFSET + 4}],
+              [
+                {kind: 0, index: HEADER_OFFSET + 5},
+                {
+                  kind: 3,
+                  index: HEADER_OFFSET + 6,
+                  cases: [
+                    [{kind: 0, index: HEADER_OFFSET + 8}],
+                    [{kind: 0, index: HEADER_OFFSET + 9}],
+                    [{kind: 0, index: HEADER_OFFSET + 10}],
+                  ],
+                  currentCaseLViewIndex: HEADER_OFFSET + 7,
+                },
+                {kind: 0, index: HEADER_OFFSET + 11},
+              ],
+            ],
+            currentCaseLViewIndex: HEADER_OFFSET + 3,
+          },
+        ],
+        parentTNodeIndex: HEADER_OFFSET,
       });
       expect(getTIcu(tView, HEADER_OFFSET + 2)).toEqual({
         type: 1,

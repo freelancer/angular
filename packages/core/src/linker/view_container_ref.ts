@@ -6,40 +6,40 @@
  * found in the LICENSE file at https://angular.io/license
  */
 
-import {Injector} from '../di/injector';
-import {EnvironmentInjector} from '../di/r3_injector';
-import {validateMatchingNode} from '../hydration/error_handling';
-import {CONTAINERS} from '../hydration/interfaces';
-import {hasInSkipHydrationBlockFlag, isInSkipHydrationBlock} from '../hydration/skip_hydration';
-import {getSegmentHead, isDisconnectedNode, markRNodeAsClaimedByHydration} from '../hydration/utils';
-import {findMatchingDehydratedView, locateDehydratedViewsInContainer} from '../hydration/views';
-import {isType, Type} from '../interface/type';
-import {assertNodeInjector} from '../render3/assert';
-import {ComponentFactory as R3ComponentFactory} from '../render3/component_ref';
-import {getComponentDef} from '../render3/definition';
-import {getParentInjectorLocation, NodeInjector} from '../render3/di';
-import {addToViewTree, createLContainer} from '../render3/instructions/shared';
-import {CONTAINER_HEADER_OFFSET, DEHYDRATED_VIEWS, LContainer, NATIVE, VIEW_REFS} from '../render3/interfaces/container';
-import {NodeInjectorOffset} from '../render3/interfaces/injector';
-import {TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType} from '../render3/interfaces/node';
-import {RComment, RNode} from '../render3/interfaces/renderer_dom';
-import {isLContainer} from '../render3/interfaces/type_checks';
-import {HEADER_OFFSET, HYDRATION, LView, PARENT, RENDERER, T_HOST, TVIEW} from '../render3/interfaces/view';
-import {assertTNodeType} from '../render3/node_assert';
-import {destroyLView, detachView, nativeInsertBefore, nativeNextSibling, nativeParentNode} from '../render3/node_manipulation';
-import {getCurrentTNode, getLView} from '../render3/state';
-import {getParentInjectorIndex, getParentInjectorView, hasParentInjector} from '../render3/util/injector_utils';
-import {getNativeByTNode, unwrapRNode, viewAttachedToContainer} from '../render3/util/view_utils';
-import {addLViewToLContainer, shouldAddViewToDom} from '../render3/view_manipulation';
-import {ViewRef as R3ViewRef} from '../render3/view_ref';
-import {addToArray, removeFromArray} from '../util/array_utils';
-import {assertDefined, assertEqual, assertGreaterThan, assertLessThan, throwError} from '../util/assert';
+import { Injector } from '../di/injector';
+import { EnvironmentInjector } from '../di/r3_injector';
+import { validateMatchingNode } from '../hydration/error_handling';
+import { CONTAINERS } from '../hydration/interfaces';
+import { isInSkipHydrationBlock } from '../hydration/skip_hydration';
+import { getSegmentHead, isDisconnectedNode, markRNodeAsClaimedByHydration } from '../hydration/utils';
+import { findMatchingDehydratedView, locateDehydratedViewsInContainer } from '../hydration/views';
+import { isType, Type } from '../interface/type';
+import { assertNodeInjector } from '../render3/assert';
+import { ComponentFactory as R3ComponentFactory } from '../render3/component_ref';
+import { getComponentDef } from '../render3/definition';
+import { getParentInjectorLocation, NodeInjector } from '../render3/di';
+import { addToViewTree, createLContainer } from '../render3/instructions/shared';
+import { CONTAINER_HEADER_OFFSET, DEHYDRATED_VIEWS, LContainer, NATIVE, VIEW_REFS } from '../render3/interfaces/container';
+import { NodeInjectorOffset } from '../render3/interfaces/injector';
+import { TContainerNode, TDirectiveHostNode, TElementContainerNode, TElementNode, TNode, TNodeType } from '../render3/interfaces/node';
+import { RComment, RNode } from '../render3/interfaces/renderer_dom';
+import { isLContainer } from '../render3/interfaces/type_checks';
+import { HEADER_OFFSET, HYDRATION, LView, PARENT, RENDERER, T_HOST, TVIEW } from '../render3/interfaces/view';
+import { assertTNodeType } from '../render3/node_assert';
+import { destroyLView, detachView, nativeInsertBefore, nativeNextSibling, nativeParentNode } from '../render3/node_manipulation';
+import { getCurrentTNode, getLView } from '../render3/state';
+import { getParentInjectorIndex, getParentInjectorView, hasParentInjector } from '../render3/util/injector_utils';
+import { getNativeByTNode, unwrapRNode, viewAttachedToContainer } from '../render3/util/view_utils';
+import { addLViewToLContainer, shouldAddViewToDom } from '../render3/view_manipulation';
+import { ViewRef as R3ViewRef } from '../render3/view_ref';
+import { addToArray, removeFromArray } from '../util/array_utils';
+import { assertDefined, assertEqual, assertGreaterThan, assertLessThan, throwError } from '../util/assert';
 
-import {ComponentFactory, ComponentRef} from './component_factory';
-import {createElementRef, ElementRef} from './element_ref';
-import {NgModuleRef} from './ng_module_factory';
-import {TemplateRef} from './template_ref';
-import {EmbeddedViewRef, ViewRef} from './view_ref';
+import { ComponentFactory, ComponentRef } from './component_factory';
+import { createElementRef, ElementRef } from './element_ref';
+import { NgModuleRef } from './ng_module_factory';
+import { TemplateRef } from './template_ref';
+import { EmbeddedViewRef, ViewRef } from './view_ref';
 
 /**
  * Represents a container where one or more views can be attached to a component.

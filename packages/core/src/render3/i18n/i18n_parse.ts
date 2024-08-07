@@ -169,6 +169,7 @@ export function i18nStartFirstCreatePass(
     create: createOpCodes,
     update: updateOpCodes,
     ast: astStack[0],
+    parentTNodeIndex,
   };
 }
 
