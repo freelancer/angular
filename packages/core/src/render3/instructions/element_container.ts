@@ -5,25 +5,25 @@
  * Use of this source code is governed by an MIT-style license that can be
  * found in the LICENSE file at https://angular.io/license
  */
-import {validateMatchingNode, validateNodeExists} from '../../hydration/error_handling';
-import {locateNextRNode, siblingAfter} from '../../hydration/node_lookup_utils';
-import {getNgContainerSize, markRNodeAsClaimedByHydration, setSegmentHead} from '../../hydration/utils';
-import {isDetachedByI18n} from '../../i18n/utils';
-import {assertEqual, assertIndexInRange, assertNumber} from '../../util/assert';
-import {assertHasParent} from '../assert';
-import {attachPatchData} from '../context_discovery';
-import {registerPostOrderHooks} from '../hooks';
-import {TAttributes, TElementContainerNode, TNode, TNodeType} from '../interfaces/node';
-import {RComment} from '../interfaces/renderer_dom';
-import {isContentQueryHost, isDirectiveHost} from '../interfaces/type_checks';
-import {HEADER_OFFSET, HYDRATION, LView, RENDERER, TView} from '../interfaces/view';
-import {assertTNodeType} from '../node_assert';
-import {appendChild, createCommentNode} from '../node_manipulation';
-import {getBindingIndex, getCurrentTNode, getLView, getTView, isCurrentTNodeParent, isInSkipHydrationBlock, lastNodeWasCreated, setCurrentTNode, setCurrentTNodeAsNotParent, wasLastNodeCreated} from '../state';
-import {computeStaticStyling} from '../styling/static_styling';
-import {getConstant} from '../util/view_utils';
+import { validateMatchingNode, validateNodeExists } from '../../hydration/error_handling';
+import { locateNextRNode, siblingAfter } from '../../hydration/node_lookup_utils';
+import { getNgContainerSize, isDisconnectedNode, markRNodeAsClaimedByHydration, setSegmentHead } from '../../hydration/utils';
+import { isDetachedByI18n } from '../../i18n/utils';
+import { assertEqual, assertIndexInRange, assertNumber } from '../../util/assert';
+import { assertHasParent } from '../assert';
+import { attachPatchData } from '../context_discovery';
+import { registerPostOrderHooks } from '../hooks';
+import { TAttributes, TElementContainerNode, TNode, TNodeType } from '../interfaces/node';
+import { RComment } from '../interfaces/renderer_dom';
+import { isContentQueryHost, isDirectiveHost } from '../interfaces/type_checks';
+import { HEADER_OFFSET, HYDRATION, LView, RENDERER, TView } from '../interfaces/view';
+import { assertTNodeType } from '../node_assert';
+import { appendChild, createCommentNode } from '../node_manipulation';
+import { getBindingIndex, getCurrentTNode, getLView, getTView, isCurrentTNodeParent, isInSkipHydrationBlock, lastNodeWasCreated, setCurrentTNode, setCurrentTNodeAsNotParent, wasLastNodeCreated } from '../state';
+import { computeStaticStyling } from '../styling/static_styling';
+import { getConstant } from '../util/view_utils';
 
-import {createDirectivesInstances, executeContentQueries, getOrCreateTNode, resolveDirectives, saveResolvedLocalsInData} from './shared';
+import { createDirectivesInstances, executeContentQueries, getOrCreateTNode, resolveDirectives, saveResolvedLocalsInData } from './shared';
 
 function elementContainerStartFirstCreatePass(
     index: number, tView: TView, lView: LView, attrsIndex?: number|null,
@@ -165,7 +165,11 @@ function locateOrCreateElementContainerNode(
     tView: TView, lView: LView, tNode: TNode, index: number): RComment {
   let comment: RComment;
   const hydrationInfo = lView[HYDRATION];
-  const isNodeCreationMode = !hydrationInfo || isInSkipHydrationBlock() || isDetachedByI18n(tNode);
+  const isNodeCreationMode =
+    !hydrationInfo ||
+    isInSkipHydrationBlock() ||
+    isDisconnectedNode(hydrationInfo, index) ||
+    isDetachedByI18n(tNode);
 
   lastNodeWasCreated(isNodeCreationMode);
 
