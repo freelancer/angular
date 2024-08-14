@@ -494,8 +494,17 @@ function serializeLView(lView: LView, context: HydrationContext): SerializedView
  *     connection to identify the location of a node.
  */
 function conditionallyAnnotateNodePath(
-    ngh: SerializedView, tNode: TNode, lView: LView<unknown>,
-    excludedParentNodes: Set<number>|null) {
+  ngh: SerializedView,
+  tNode: TNode,
+  lView: LView<unknown>,
+  excludedParentNodes: Set<number> | null,
+) {
+  if (isProjectionTNode(tNode)) {
+    // Do not annotate projection nodes (<ng-content />), since
+    // they don't have a corresponding DOM node representing them.
+    return;
+  }
+
   // Handle case #1 described above.
   if (tNode.projectionNext && tNode.projectionNext !== tNode.next &&
       !isInSkipHydrationBlock(tNode.projectionNext)) {
